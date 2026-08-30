@@ -1,121 +1,125 @@
 <!DOCTYPE html>
-<html lang = "en">
+<html lang="en">
+
 <head>
-    <meta charset = "UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width = device-width, initial-scale=1.0">
     <title>Expense Tracker</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <header>
+    <header class="header">
         <h1>Expense Tracker</h1>
     </header>
+    <div class="layout">
+        <aside>
+            <nav>
+                <a href="#">Dashboard</a>
+                <a href="#">Expenses</a>
+                <a href="#">Income</a>
+                <a href="#">Budget</a>
+                <a href="#">Reports</a>
+            </nav>
+        </aside>
 
-    <aside>
-        <nav>
-            <a href="#">Dashboard</a>
-            <a href="#">Expenses</a>
-            <a href="#">Income</a>
-            <a href="#">Budget</a>
-            <a href="#">Reports</a>
-        </nav>
-    </aside>
+        <main>
+            <h2>Dashboard</h2>
 
-    <main>
-        <h2>Dashboard</h2>
+            <section>
+                <h3>Total Income</h3>
+                <p>₹0</p>
+            </section>
 
-        <section>
-            <h3>Total Income</h3>
-            <p>₹0</p>
-        </section>
+            <section>
+                <h3>Total Expenses</h3>
+                <p>₹0</p>
+            </section>
 
-        <section>
-            <h3>Total Expenses</h3>
-            <p>₹0</p>
-        </section>
+            <section>
+                <h3>Balance</h3>
+                <p>₹0</p>
+            </section>
 
-        <section>
-            <h3>Balance</h3>
-            <p>₹0</p>
-        </section>
+            <section>
+                <h2>Recent Transactions</h2>
+                <table>
+                    <thread>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thread>
 
-    <section>
-        <h2>Recent Transactions</h2>
-        <table>
-            <thread>
-                <tr>
-                    <th>Date</th>
-                    <th>Description</th>
-                    <th>Category</th>
-                    <th>Amount</th>
-                </tr>
-            </thread>
+                    <tbody>
+                        <tr>
+                            <td>18 Aug 2026</td>
+                            <td>Lunch</td>
+                            <td>Food</td>
+                            <td>₹250</td>
+                        </tr>
 
-            <tbody>
-                <tr>
-                    <td>18 Aug 2026</td>
-                    <td>Lunch</td>
-                    <td>Food</td>
-                    <td>₹250</td>
-                </tr>
+                        <tr>
+                            <td>17 Aug 2026</td>
+                            <td>Bus</td>
+                            <td>Transport</td>
+                            <td>₹50</td>
+                        </tr>
 
-                <tr>
-                    <td>17 Aug 2026</td>
-                    <td>Bus</td>
-                    <td>Transport</td>
-                    <td>₹50</td>
-                </tr>
+                        <tr>
+                            <td>16 Aug 2026</td>
+                            <td>Movie</td>
+                            <td>Entertainment</td>
+                            <td>₹300</td>
+                        </tr>
+                    </tbody>
 
-                <tr>
-                    <td>16 Aug 2026</td>
-                    <td>Movie</td>
-                    <td>Entertainment</td>
-                    <td>₹300</td>
-                </tr>
-            </tbody>
+                </table>
+            </section>
 
-        </table>
-    </section>
+            <section>
+                <h2>Add Expense</h2>
 
-    <section>
-        <h2>Add Expense</h2>
+                <form>
+                    <label for="amount">Amount</label>
+                    <input type="number" id="amount" name="amount" min="0.01" step="0.01" required>
 
-        <form>
-            <label for="amount">Amount</label>
-            <input type="number" id="amount" name="amount" min="0.01" step="0.01" required>
-            
-            <label for="category">Category</label>
-            <select id="category" name="category">
-                <option value="food">Food</option>
-                <option value="transport">Transport</option>
-                <option value="shopping">Shopping</option>
-                <option value="entertainment">Entertainment</option>
-                <option value="bills">Bills</option>
-                <option value="education">Education</option>
-                <option value="healtlh">Health</option>
-                <option value="travel">Travel</option>
-                <option value="other">Other</option>
-            </select>
+                    <label for="category">Category</label>
+                    <select id="category" name="category">
+                        <option value="food">Food</option>
+                        <option value="transport">Transport</option>
+                        <option value="shopping">Shopping</option>
+                        <option value="entertainment">Entertainment</option>
+                        <option value="bills">Bills</option>
+                        <option value="education">Education</option>
+                        <option value="healtlh">Health</option>
+                        <option value="travel">Travel</option>
+                        <option value="other">Other</option>
+                    </select>
 
-            <label for="description">Description</label>
-            <input type="text" id="description" name="description" required>
+                    <label for="description">Description</label>
+                    <input type="text" id="description" name="description" required>
 
-            <label for="date">Date</label>
-            <input type="date" id="date" name="date" required>
+                    <label for="date">Date</label>
+                    <input type="date" id="date" name="date" required>
 
-            <label for="payment method">Payment Method</label>
-            <select id="payment method" name="payment method">
-                <option value="cash">Cash</option>
-                <option value="upi">UPI</option>
-                <option value="debit-card">Debit Card</option>
-                <option value="credit-card">Credit Card</option>
-                <option value="net-banking">Net Banking</option>
-            </select>
+                    <label for="payment method">Payment Method</label>
+                    <select id="payment method" name="payment method">
+                        <option value="cash">Cash</option>
+                        <option value="upi">UPI</option>
+                        <option value="debit-card">Debit Card</option>
+                        <option value="credit-card">Credit Card</option>
+                        <option value="net-banking">Net Banking</option>
+                    </select>
 
-            <button type="submit">Add Expense</button>
+                    <button type="submit">Add Expense</button>
 
-        </form>
-    </section>
-    </main>
+                </form>
+            </section>
+        </main>
+    </div>
 </body>
+
 </html>
