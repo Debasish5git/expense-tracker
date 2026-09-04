@@ -1,143 +1,225 @@
-*{
-    margin:0;
-    padding:0;
+* {
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
 }
 
-body{
-    font-family:Arial, Helvetica, sans-serif;
-    font-size:16px;
-    line-height:1.5;
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
     color: #1f2937;
-    background-color:#f4f7fb;
+    background-color: #f4f7fb;
 }
 
-.header{
-    background-color:#2563eb;
-    color:#ffffff;
-    padding:20px;
+.header {
+    background-color: #2563eb;
+    color: #ffffff;
+    padding: 20px;
 }
 
-.header h1{
+.header h1 {
     font-size: 28px;
     font-weight: 600;
 }
 
-.layout{
+.layout {
     display: flex;
 }
 
-.layout aside{
+.layout aside {
     width: 220px;
     background-color: #ffffff;
     padding: 20px;
 }
 
-.layout nav{
+.layout nav {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
-.layout nav a{
+.layout nav a {
     color: #1f2937;
     text-decoration: none;
     padding: 10px;
 }
 
-.layout main{
+.layout main {
     flex: 1;
     padding: 30px;
 }
 
-.summary-cards{
+.summary-cards {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
 }
 
-.card{
-    background-color:#ffffff;
-    border-radius:10px;
-    padding:20px;
+.card {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 20px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
-.card h3{
+.card h3 {
     font-size: 16px;
     color: #6b7280;
     margin-bottom: 10px;
 }
 
-.card p{
+.card p {
     font-size: 24px;
     font-weight: 600;
 }
 
-.layout main > h2{
+.layout main>h2 {
     margin-bottom: 20px;
 }
 
-.transactions-table{
+.transactions-table {
     width: 100%;
-    border-collapse:collapse;
+    border-collapse: collapse;
 }
 
 .transactions-table th,
-.transactions-table td{
+.transactions-table td {
     padding: 12px;
     text-align: left;
     border-bottom: 1px solid #e5e7eb;
 }
 
-.transactions-table th{
+.transactions-table th {
     color: #6b7280;
     font-weight: 600;
 }
 
-.transactions-table tbody tr:hover{
+.transactions-table tbody tr:hover {
     background-color: #f9fafb;
 }
 
-.expense-form{
+.expense-form {
     background-color: #ffffff;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
-.form-grid{
+.form-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
 }
 
-.form-group{
+.form-group {
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
 .form-group input,
-.form-group select{
+.form-group select {
     width: 100%;
     padding: 10px;
     border: 1px solid #d1d5db;
     border-radius: 6px;
-    font-size:16px;
+    font-size: 16px;
 }
 
-.expense-form button{
+.expense-form button {
     background-color: #2563eb;
-    color:#ffffff;
+    color: #ffffff;
     padding: 10px 20px;
     border: none;
-    border-radius:6px;
-    font-size:16px;
-    cursor:pointer;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    align-self:end;
     transition: background-color 0.2s ease;
 }
 
-.expense-form button:hover{
+.expense-form button:hover {
     background-color: #1e3a8a;
+}
+
+.expense-form label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.form-group input,
+.form-group select {
+    font-size: 16px;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    width: 100%;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+@media (max-width:900px) {
+    .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .summary-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width:600px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .summary-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .layout {
+        flex-direction: column;
+    }
+
+    .layout aside {
+        width: 100%;
+        padding: 10px 15px;
+    }
+
+    .layout nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .layout main {
+        padding: 15px;
+    }
+
+    .table-container {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .table-container table {
+        min-width: 0;
+        font-size: 13px;
+    }
+
+    .table-container th,
+    .table-container td{
+        padding: 8px 6px;
+    }
+
+    .expense-from button{
+        width:100%;
+    }
 }
