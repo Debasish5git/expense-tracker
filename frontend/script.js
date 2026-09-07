@@ -1,10 +1,8 @@
 console.log("Expense Tracker JavaScript is connected!");
 
 const pageTitle = document.getElementById("page-title");
-console.log(pageTitle);
 
 const expenseForm =document.getElementById("expense-form");
-console.log(expenseForm);
 
 const amountInput = document.getElementById("amount");
 
@@ -14,7 +12,7 @@ const descriptionInput = document.getElementById("description");
 
 const dateInput = document.getElementById("date");
 
-const paymentMethodInput = document.getElementById("payment method");
+const paymentMethodInput = document.getElementById("payment-method");
 
 const transactionsTable = document.getElementById("transactions-table");
 
@@ -29,13 +27,11 @@ expenseForm.addEventListener("submit", function(event){
         paymentMethod: paymentMethodInput.value
     };
 
-    console.log(expense);
-
     const newRow = document.createElement("tr");
     
-    const datecell = document.createElement("td");
-    datecell.textContent = expense.date;
-    newRow.appendChild(datecell);
+    const dateCell = document.createElement("td");
+    dateCell.textContent = expense.date;
+    newRow.appendChild(dateCell);
 
     const descriptionCell = document.createElement("td");
     descriptionCell.textContent = expense.description;
@@ -50,8 +46,4 @@ expenseForm.addEventListener("submit", function(event){
     newRow.appendChild(amountCell);
 
     transactionsTable.appendChild(newRow);
-
-    console.log(newRow);
-
-    console.log(transactionsTable);
 });
