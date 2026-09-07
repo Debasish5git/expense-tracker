@@ -10,7 +10,7 @@
 
 <body>
     <header class="header">
-        <h1>Expense Tracker</h1>
+        <h1 id="page-title">Expense Tracker</h1>
     </header>
     <div class="layout">
         <aside>
@@ -45,7 +45,7 @@
             <section>
                 <h2>Recent Transactions</h2>
                 <div class="table-container">
-                    <table class="transactions-table">
+                    <table id="transactions-table" class="transactions-table">
                         <thread>
                             <tr>
                                 <th>Date</th>
@@ -85,7 +85,7 @@
             <section>
                 <h2>Add Expense</h2>
 
-                <form class="expense-form">
+                <form id="expense-form" class="expense-form">
 
                     <div class="form-grid">
 
@@ -137,6 +137,7 @@
             </section>
         </main>
     </div>
+    <script src="script.js"></script>
 </body>
 
 </html>
