@@ -16,6 +16,18 @@ const paymentMethodInput = document.getElementById("payment-method");
 
 const transactionsTable = document.getElementById("transactions-table");
 
+const totalExpenses = document.getElementById("total-expenses");
+
+const balance = document.getElementById("balance");
+
+const totalIncome = document.getElementById("total-income");
+
+let totalExpenseAmount = 0;
+
+let totalIncomeAmount = 10000;
+
+totalIncome.textContent = "₹" + totalIncomeAmount;
+
 expenseForm.addEventListener("submit", function(event){
     event.preventDefault();
 
@@ -26,6 +38,11 @@ expenseForm.addEventListener("submit", function(event){
         date: dateInput.value,
         paymentMethod: paymentMethodInput.value
     };
+
+    totalExpenseAmount = totalExpenseAmount + Number(expense.amount);
+    totalExpenses.textContent = "₹" + totalExpenseAmount;
+
+    balance.textContent = "₹" + (totalIncomeAmount - totalExpenseAmount);
 
     const newRow = document.createElement("tr");
     
