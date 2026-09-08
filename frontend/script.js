@@ -28,6 +28,12 @@ let totalIncomeAmount = 10000;
 
 totalIncome.textContent = "₹" + totalIncomeAmount;
 
+const incomeForm = document.getElementById("add-income");
+
+const incomeAmountInput = document.getElementById("income-amount");
+const incomeSourceInput = document.getElementById("income-source");
+const incomeDateInput = document.getElementById("income-date");
+
 expenseForm.addEventListener("submit", function(event){
     event.preventDefault();
 
@@ -63,4 +69,18 @@ expenseForm.addEventListener("submit", function(event){
     newRow.appendChild(amountCell);
 
     transactionsTable.appendChild(newRow);
+});
+
+incomeForm.addEventListener("submit", function(event){
+    event.preventDefault();
+
+    const incomeAmount = incomeAmountInput.value;
+    const incomeSource = incomeSourceInput.value;
+    const incomeDate = incomeDateInput.value;
+
+    totalIncomeAmount = totalIncomeAmount + Number(incomeAmount);
+
+    totalIncome.textContent = "₹" + totalIncomeAmount;
+
+    balance.textContent = "₹" + (totalIncomeAmount - totalExpenseAmount);
 });
