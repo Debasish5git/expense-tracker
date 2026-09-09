@@ -42,7 +42,8 @@ expenseForm.addEventListener("submit", function(event){
         category: categoryInput.value,
         description: descriptionInput.value,
         date: dateInput.value,
-        paymentMethod: paymentMethodInput.value
+        paymentMethod: paymentMethodInput.value,
+        type: "Expense"
     };
 
     totalExpenseAmount = totalExpenseAmount + Number(expense.amount);
@@ -64,6 +65,10 @@ expenseForm.addEventListener("submit", function(event){
     categoryCell.textContent = expense.category;
     newRow.appendChild(categoryCell);
 
+    const typeCell = document.createElement("td");
+    typeCell.textContent = expense.type;
+    newRow.appendChild(typeCell);
+
     const amountCell = document.createElement("td");
     amountCell.textContent = "₹" + expense.amount;
     newRow.appendChild(amountCell);
@@ -77,6 +82,37 @@ incomeForm.addEventListener("submit", function(event){
     const incomeAmount = incomeAmountInput.value;
     const incomeSource = incomeSourceInput.value;
     const incomeDate = incomeDateInput.value;
+
+    const income = {
+        amount: incomeAmount,
+        source: incomeSource,
+        date: incomeDate,
+        type: "Income"
+    };
+
+    const newRow = document.createElement("tr");
+
+    const dateCell = document.createElement("td");
+    dateCell.textContent = income.date;
+    newRow.appendChild(dateCell);
+
+    const descriptionCell = document.createElement("td");
+    descriptionCell.textContent = income.source;
+    newRow.appendChild(descriptionCell);
+
+    const categoryCell = document.createElement("td");
+    categoryCell.textContent = "-";
+    newRow.appendChild(categoryCell);
+
+    const typeCell = document.createElement("td");
+    typeCell.textContent = income.type;
+    newRow.append(typeCell);
+
+    const amountCell = document.createElement("td");
+    amountCell.textContent = "₹" + income.amount;
+    newRow.append(amountCell);
+
+    transactionsTable.appendChild(newRow);
 
     totalIncomeAmount = totalIncomeAmount + Number(incomeAmount);
 
