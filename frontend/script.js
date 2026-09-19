@@ -15,6 +15,7 @@ const dateInput = document.getElementById("date");
 const paymentMethodInput = document.getElementById("payment-method");
 
 const transactionsTable = document.getElementById("transactions-table");
+const transactionsBody = document.getElementById("transactions-body");
 
 const totalExpenses = document.getElementById("total-expenses");
 
@@ -24,15 +25,62 @@ const totalIncome = document.getElementById("total-income");
 
 let totalExpenseAmount = 0;
 
-let totalIncomeAmount = 10000;
+let totalIncomeAmount = 0;
+
+let transactions = [];
 
 totalIncome.textContent = "₹" + totalIncomeAmount;
+balance.textContent = "₹" + (totalIncomeAmount - totalExpenseAmount);
 
 const incomeForm = document.getElementById("add-income");
 
 const incomeAmountInput = document.getElementById("income-amount");
 const incomeSourceInput = document.getElementById("income-source");
 const incomeDateInput = document.getElementById("income-date");
+
+function displayTransactions(){
+
+    transactionsBody.innerHTML = "";
+
+    if(transactions.length === 0){
+        const placeholderRow = document.createElement("tr");
+
+        const placeholderCell = document.createElement("td");
+        placeholderCell.colSpan = 5;
+        placeholderCell.textContent = "No Transactions Yet";
+
+        placeholderRow.appendChild(placeholderCell);
+        transactionsBody.appendChild(placeholderRow);
+    }
+
+    transactions.forEach(function(transaction){
+
+        const newRow = document.createElement("tr");
+
+        const dateCell = document.createElement("td");
+        dateCell.textContent = transaction.date;
+        newRow.appendChild(dateCell);
+
+        const descriptionCell = document.createElement("td");
+        descriptionCell.textContent = transaction.description;
+        newRow.appendChild(descriptionCell);
+
+        const categoryCell = document.createElement("td");
+        categoryCell.textContent = transaction.category || "-";
+        newRow.appendChild(categoryCell);
+
+        const typeCell = document.createElement("td");
+        typeCell.textContent = transaction.type;
+        newRow.appendChild(typeCell);
+
+        const amountCell = document.createElement("td");
+        amountCell.textContent = "₹" + transaction.amount;
+        newRow.appendChild(amountCell);
+
+        transactionsBody.appendChild(newRow);
+
+    });
+}
 
 expenseForm.addEventListener("submit", function(event){
     event.preventDefault();
@@ -45,35 +93,16 @@ expenseForm.addEventListener("submit", function(event){
         paymentMethod: paymentMethodInput.value,
         type: "Expense"
     };
+    transactions.push(expense);
 
     totalExpenseAmount = totalExpenseAmount + Number(expense.amount);
     totalExpenses.textContent = "₹" + totalExpenseAmount;
 
     balance.textContent = "₹" + (totalIncomeAmount - totalExpenseAmount);
 
-    const newRow = document.createElement("tr");
-    
-    const dateCell = document.createElement("td");
-    dateCell.textContent = expense.date;
-    newRow.appendChild(dateCell);
+    displayTransactions();
 
-    const descriptionCell = document.createElement("td");
-    descriptionCell.textContent = expense.description;
-    newRow.appendChild(descriptionCell);
-
-    const categoryCell = document.createElement("td");
-    categoryCell.textContent = expense.category;
-    newRow.appendChild(categoryCell);
-
-    const typeCell = document.createElement("td");
-    typeCell.textContent = expense.type;
-    newRow.appendChild(typeCell);
-
-    const amountCell = document.createElement("td");
-    amountCell.textContent = "₹" + expense.amount;
-    newRow.appendChild(amountCell);
-
-    transactionsTable.appendChild(newRow);
+    expenseForm.reset();
 });
 
 incomeForm.addEventListener("submit", function(event){
@@ -85,38 +114,22 @@ incomeForm.addEventListener("submit", function(event){
 
     const income = {
         amount: incomeAmount,
-        source: incomeSource,
+        description: incomeSource,
         date: incomeDate,
         type: "Income"
     };
 
-    const newRow = document.createElement("tr");
-
-    const dateCell = document.createElement("td");
-    dateCell.textContent = income.date;
-    newRow.appendChild(dateCell);
-
-    const descriptionCell = document.createElement("td");
-    descriptionCell.textContent = income.source;
-    newRow.appendChild(descriptionCell);
-
-    const categoryCell = document.createElement("td");
-    categoryCell.textContent = "-";
-    newRow.appendChild(categoryCell);
-
-    const typeCell = document.createElement("td");
-    typeCell.textContent = income.type;
-    newRow.append(typeCell);
-
-    const amountCell = document.createElement("td");
-    amountCell.textContent = "₹" + income.amount;
-    newRow.append(amountCell);
-
-    transactionsTable.appendChild(newRow);
+    transactions.push(income);
 
     totalIncomeAmount = totalIncomeAmount + Number(incomeAmount);
 
     totalIncome.textContent = "₹" + totalIncomeAmount;
 
     balance.textContent = "₹" + (totalIncomeAmount - totalExpenseAmount);
+
+    displayTransactions();
+
+    incomeForm.reset();
 });
+
+displayTransactions();
