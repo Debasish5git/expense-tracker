@@ -29,6 +29,8 @@ let totalIncomeAmount = 0;
 
 let transactions = [];
 
+let selectedTransaction = null;
+
 totalIncome.textContent = "₹" + totalIncomeAmount;
 balance.textContent = "₹" + (totalIncomeAmount - totalExpenseAmount);
 
@@ -37,6 +39,16 @@ const incomeForm = document.getElementById("add-income");
 const incomeAmountInput = document.getElementById("income-amount");
 const incomeSourceInput = document.getElementById("income-source");
 const incomeDateInput = document.getElementById("income-date");
+
+const transactionModal = document.getElementById("transaction-modal");
+
+const transactionDetails = document.getElementById("transaction-details");
+
+const closeModal = document.getElementById("close-modal");
+
+const cancelModal = document.getElementById("cancel-modal");
+
+const deleteTransaction = document.getElementById("delete-transaction");
 
 function displayTransactions(){
 
@@ -56,6 +68,23 @@ function displayTransactions(){
     transactions.forEach(function(transaction){
 
         const newRow = document.createElement("tr");
+
+        newRow.style.cursor = "pointer";
+
+        newRow.addEventListener("click", function(){
+
+            selectedTransaction = transaction;
+
+            transactionDetails.innerHTML = `
+            <p><strong>Description:</strong> ${transaction.description}</p>
+            <p><strong>Amount:</strong> ₹${transaction.amount}</p>
+            <p><strong>Category:</strong> ${transaction.category || "-"}</p>
+            <p><strong>Date:</strong> ${transaction.date}</p>
+            <p><strong>Payment Method:</strong> ${transaction.paymentMethod || "-"}</p>
+            <p><strong>Type:</strong> ${transaction.type}</p>
+            `;
+            transactionModal.style.display = "flex";
+        });
 
         const dateCell = document.createElement("td");
         dateCell.textContent = transaction.date;
@@ -80,6 +109,25 @@ function displayTransactions(){
         transactionsBody.appendChild(newRow);
 
     });
+}
+
+function calculateTotals() {
+    totalExpenseAmount = 0;
+    totalIncomeAmount = 0;
+
+    transactions.forEach(function (transaction) {
+        if (transaction.type === "Expense") {
+            totalExpenseAmount = totalExpenseAmount + Number(transaction.amount);
+        }
+
+        if (transaction.type === "Income") {
+            totalIncomeAmount = totalIncomeAmount + Number(transaction.amount);
+        }
+    });
+
+    totalExpenses.textContent = "₹" + totalExpenseAmount;
+    totalIncome.textContent = "₹" + totalIncomeAmount;
+    balance.textContent = "₹" + (totalIncomeAmount - totalExpenseAmount);
 }
 
 expenseForm.addEventListener("submit", function(event){
@@ -133,3 +181,33 @@ incomeForm.addEventListener("submit", function(event){
 });
 
 displayTransactions();
+
+closeModal.addEventListener("click", function(){
+    transactionModal.style.display = "none";
+});
+
+cancelModal.addEventListener("click", function(){
+    transactionModal.style.display = "none";
+});
+
+deleteTransaction.addEventListener("click", function(){
+    if(selectedTransaction === null){
+        return;
+    }
+
+    const transactionIndex = transactions.indexOf(selectedTransaction);
+
+    if(transactionIndex === -1){
+        return;
+    }
+
+    transactions.splice(transactionIndex, 1);
+
+    calculateTotals();
+
+    displayTransactions();
+
+    transactionModal.style.display = "none";
+
+    selectedTransaction = null;
+});
