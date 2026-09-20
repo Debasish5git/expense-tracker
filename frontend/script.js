@@ -48,7 +48,21 @@ const closeModal = document.getElementById("close-modal");
 
 const cancelModal = document.getElementById("cancel-modal");
 
+const editTransaction = document.getElementById("edit-transaction");
+
 const deleteTransaction = document.getElementById("delete-transaction");
+
+function showTransactionDetails(transaction){
+
+    transactionDetails.innerHTML = `
+        <p><strong>Description:</strong> ${transaction.description}</p>
+        <p><strong>Amount:</strong> ₹${transaction.amount}</p>
+        <p><strong>Category:</strong> ${transaction.category || "-"}</p>
+        <p><strong>Date:</strong> ${transaction.date}</p>
+        <p><strong>Payment Method:</strong> ${transaction.paymentMethod || "-"}</p>
+        <p><strong>Type:</strong> ${transaction.type}</p>
+    `;
+}
 
 function displayTransactions(){
 
@@ -75,15 +89,9 @@ function displayTransactions(){
 
             selectedTransaction = transaction;
 
-            transactionDetails.innerHTML = `
-            <p><strong>Description:</strong> ${transaction.description}</p>
-            <p><strong>Amount:</strong> ₹${transaction.amount}</p>
-            <p><strong>Category:</strong> ${transaction.category || "-"}</p>
-            <p><strong>Date:</strong> ${transaction.date}</p>
-            <p><strong>Payment Method:</strong> ${transaction.paymentMethod || "-"}</p>
-            <p><strong>Type:</strong> ${transaction.type}</p>
-            `;
+            showTransactionDetails(transaction);
             transactionModal.style.display = "flex";
+            document.body.classList.add("modal-open");
         });
 
         const dateCell = document.createElement("td");
@@ -184,10 +192,169 @@ displayTransactions();
 
 closeModal.addEventListener("click", function(){
     transactionModal.style.display = "none";
+    document.body.classList.remove("modal-open");
 });
 
 cancelModal.addEventListener("click", function(){
+    if(selectedTransaction === null){
+        return;
+    }
+
+    if (editTransaction.textContent === "Save Changes") {
+
+        showTransactionDetails(selectedTransaction);
+        editTransaction.textContent = "Edit";
+
+        return;
+    }
+
     transactionModal.style.display = "none";
+    document.body.classList.remove("modal-open");
+
+    selectedTransaction = null;
+});
+
+editTransaction.addEventListener("click", function(){
+    if(selectedTransaction === null){
+        return
+    }
+
+    if(editTransaction.textContent === "Edit"){
+
+        editTransaction.textContent = "Save Changes";
+
+        if (selectedTransaction.type === "Expense") {
+
+            transactionDetails.innerHTML = `
+            <div>
+                <label>Amount</label>
+                <input type="number" id="edit-amount" value="${selectedTransaction.amount}">
+            </div>
+
+            <div>
+                <label>Category</label>
+                <select id="edit-category">
+                    <option value="food">Food</option>
+                    <option value="transport">Transport</option>
+                    <option value="shopping">Shopping</option>
+                    <option value="entertainment">Entertainment</option>
+                    <option value="bills">Bills</option>
+                    <option value="education">Education</option>
+                    <option value="health">Health</option>
+                    <option value="travel">Travel</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Description</label>
+                <input type="text" id="edit-description" value="${selectedTransaction.description}">
+            </div>
+
+            <div>
+                <label>Date</label>
+                <input type="date" id="edit-date" value="${selectedTransaction.date}">
+            </div>
+
+            <div>
+                <label>Payment Method</label>
+                <select id="edit-payment-method">
+                    <option value="cash">Cash</option>
+                    <option value="upi">UPI</option>
+                    <option value="debit-card">Debit Card</option>
+                    <option value="credit-card">Credit Card</option>
+                    <option value="bank-transfer">Bank Transfer</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Type</label>
+                <input type="text" value="${selectedTransaction.type}" disabled>
+            </div>
+        `;
+
+            document.getElementById("edit-category").value = selectedTransaction.category;
+
+            document.getElementById("edit-payment-method").value = selectedTransaction.paymentMethod;
+        }
+
+        else if (selectedTransaction.type === "Income") {
+            transactionDetails.innerHTML = `
+        <div>
+            <label>Amount</label>
+            <input
+                type="number"
+                id="edit-income-amount"
+                value="${selectedTransaction.amount}"
+            >
+        </div>
+
+        <div>
+            <label>Source</label>
+            <input
+                type="text"
+                id="edit-income-source"
+                value="${selectedTransaction.description}"
+            >
+        </div>
+
+        <div>
+            <label>Date</label>
+            <input
+                type="date"
+                id="edit-income-date"
+                value="${selectedTransaction.date}"
+            >
+        </div>
+
+        <div>
+            <label>Type</label>
+            <input
+                type="text"
+                value="${selectedTransaction.type}"
+                disabled
+            >
+        </div>
+        `;
+        }
+    }
+
+    else {
+
+        if (selectedTransaction.type === "Expense") {
+            const editedAmount = document.getElementById("edit-amount").value;
+            const editedCategory = document.getElementById("edit-category").value;
+            const editedDescription = document.getElementById("edit-description").value;
+            const editedDate = document.getElementById("edit-date").value;
+            const editedPaymentMethod = document.getElementById("edit-payment-method").value;
+
+            selectedTransaction.amount = editedAmount;
+            selectedTransaction.category = editedCategory;
+            selectedTransaction.description = editedDescription;
+            selectedTransaction.date = editedDate;
+            selectedTransaction.paymentMethod = editedPaymentMethod;
+        }
+        else if (selectedTransaction.type === "Income") {
+            const editedAmount = document.getElementById("edit-income-amount").value;
+            const editedSource = document.getElementById("edit-income-source").value;
+            const editedDate = document.getElementById("edit-income-date").value;
+
+            selectedTransaction.amount = editedAmount;
+            selectedTransaction.description = editedSource;
+            selectedTransaction.date = editedDate;
+        }
+
+        calculateTotals();
+
+        displayTransactions();
+
+        transactionModal.style.display = "none";
+        document.body.classList.remove("modal-open");
+
+        editTransaction.textContent = "Edit";
+
+        selectedTransaction = null;
+    }
 });
 
 deleteTransaction.addEventListener("click", function(){
@@ -208,6 +375,7 @@ deleteTransaction.addEventListener("click", function(){
     displayTransactions();
 
     transactionModal.style.display = "none";
+    document.body.classList.remove("modal-open");
 
     selectedTransaction = null;
 });
