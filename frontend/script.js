@@ -150,6 +150,7 @@ expenseForm.addEventListener("submit", function(event){
         type: "Expense"
     };
     transactions.push(expense);
+    saveTransactions();
 
     totalExpenseAmount = totalExpenseAmount + Number(expense.amount);
     totalExpenses.textContent = "₹" + totalExpenseAmount;
@@ -176,6 +177,8 @@ incomeForm.addEventListener("submit", function(event){
     };
 
     transactions.push(income);
+
+    saveTransactions();
 
     totalIncomeAmount = totalIncomeAmount + Number(incomeAmount);
 
@@ -345,6 +348,7 @@ editTransaction.addEventListener("click", function(){
         }
 
         calculateTotals();
+        saveTransactions();
 
         displayTransactions();
 
@@ -371,6 +375,7 @@ deleteTransaction.addEventListener("click", function(){
     transactions.splice(transactionIndex, 1);
 
     calculateTotals();
+    saveTransactions();
 
     displayTransactions();
 
@@ -379,3 +384,19 @@ deleteTransaction.addEventListener("click", function(){
 
     selectedTransaction = null;
 });
+
+function saveTransactions(){
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+}
+
+function loadTransactions(){
+    const savedTransactions = localStorage.getItem("transactions");
+
+    if(savedTransactions){
+        transactions = JSON.parse(savedTransactions);
+    }
+}
+
+loadTransactions();
+calculateTotals();
+displayTransactions();
