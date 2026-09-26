@@ -52,6 +52,61 @@ const editTransaction = document.getElementById("edit-transaction");
 
 const deleteTransaction = document.getElementById("delete-transaction");
 
+const typeFilter = document.getElementById("type-filter");
+
+const sortFilter = document.getElementById("sort-filter");
+
+typeFilter.addEventListener("change", function(){
+    const selectedType = typeFilter.value;
+
+    const filteredTransactions = transactions.filter(function(transaction){
+        return selectedType === "all" || transaction.type === selectedType;
+    });
+    
+    displayTransactions(filteredTransactions);
+});
+
+sortFilter.addEventListener("change", function(){
+    const selectedType = typeFilter.value;
+    const filteredTransactions = transactions.filter(function(transaction){
+        return selectedType === "all" || transaction.type === selectedType;
+    });
+
+    const sortedTransactions = sortTransactions(filteredTransactions);
+
+    displayTransactions(sortedTransactions);
+});
+
+function sortTransactions(transactionList){
+    const selectedSort = sortFilter.value;
+
+    if(selectedSort === "newest"){
+        transactionList.sort(function(a, b){
+            return new Date(b.date) - new Date(a.date);
+        });
+    }
+
+    else if(selectedSort === "oldest"){
+        transactionList.sort(function(a, b){
+            return new Date(a.date) - new Date(b.date);
+        });
+    }
+
+    else if(selectedSort === "amount-high"){
+        transactionList.sort(function(a, b){
+            return Number(b.amount) - Number(a.amount);
+        });
+    }
+
+    else if(selectedSort === "amount-low"){
+        transactionList.sort(function(a, b){
+            return Number(a.amount) - Number(b.amount);
+        });
+    }
+
+    return transactionList;
+}
+
 function showTransactionDetails(transaction){
 
     transactionDetails.innerHTML = `
@@ -64,11 +119,11 @@ function showTransactionDetails(transaction){
     `;
 }
 
-function displayTransactions(){
+function displayTransactions(transactionList = transactions){
 
     transactionsBody.innerHTML = "";
 
-    if(transactions.length === 0){
+    if(transactionList.length === 0){
         const placeholderRow = document.createElement("tr");
 
         const placeholderCell = document.createElement("td");
@@ -79,7 +134,7 @@ function displayTransactions(){
         transactionsBody.appendChild(placeholderRow);
     }
 
-    transactions.forEach(function(transaction){
+    transactionList.forEach(function(transaction){
 
         const newRow = document.createElement("tr");
 

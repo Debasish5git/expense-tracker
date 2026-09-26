@@ -362,3 +362,24 @@ body {
 body.modal-open{
     overflow:hidden;
 }
+
+.filter-section{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:15px;
+}
+
+.filter-section{
+    font-weight:600;
+}
+
+#type-filter,
+#sort-filter{
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius:6px;
+    background-color:white;
+    font-size:14px;
+    cursor:pointer;
+}

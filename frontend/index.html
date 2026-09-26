@@ -44,6 +44,25 @@
 
             <section>
                 <h2>Recent Transactions</h2>
+                <div class="filter-section">
+
+                    <label for="type-filter">Type</label>
+                    <select id="type-filter">
+                        <option value="all">All</option>
+                        <option value="Expense">Expense</option>
+                        <option value="Income">Income</option>
+                    </select>
+
+                    <label for="sort-filter">Sort</label>
+                    <select id="sort-filter">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="amount-high">Amount: High to Low</option>
+                        <option value="amount-low">Amount: Low to High</option>
+                    </select>
+
+                </div>
+                
                 <div class="table-container">
                     <table id="transactions-table" class="transactions-table">
                         <thead>
