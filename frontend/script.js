@@ -56,6 +56,14 @@ const typeFilter = document.getElementById("type-filter");
 
 const sortFilter = document.getElementById("sort-filter");
 
+const sidebar = document.getElementById("sidebar");
+
+const sidebarToggle = document.getElementById("sidebar-toggle");
+
+sidebarToggle.addEventListener("click", function(){
+    sidebar.classList.toggle("collapsed");
+});
+
 typeFilter.addEventListener("change", function(){
     const selectedType = typeFilter.value;
 
@@ -450,6 +458,24 @@ function loadTransactions(){
     if(savedTransactions){
         transactions = JSON.parse(savedTransactions);
     }
+}
+
+function calculateExpensesByCategory(){
+    const categoryTotals = {};
+
+    transactions.forEach(function(transaction){
+        
+        if(transaction.type == "Expense"){
+            if(categoryTotals[transaction.category]){
+                categoryTotals[transaction.category] = categoryTotals[transaction.category] + Number(transaction.amount);
+            }
+            else{
+                categoryTotals[transaction.category] = Number(transaction.amount);
+            }
+        }
+    });
+
+    return categoryTotals;
 }
 
 loadTransactions();
