@@ -29,7 +29,9 @@
                     id="sidebar-toggle"
                     class="sidebar-toggle"
                     aria-label="collapse sidebar"
-                    >⁝</button>
+                    >
+                    ⁝
+                </button>
             </div>
 
             <nav class="sidebar-nav">
@@ -211,8 +213,28 @@
                     </div>
                 </div>
 
-                <div class="dashboard-card">
-                    <h2>Analytics</h2>
+                <div class="dashboard-card analytics-card">
+                    <div class="analytics-header">
+
+                        <h2>Analytics</h2>
+
+                        <button type="button"
+                            id="analytics-menu-button"
+                            class="analytics-menu-button">
+                            ⁝
+                        </button>
+
+                    </div>
+
+                    <div class="analytics-content">
+                        <h3>Expenses by Category</h3>
+
+                        <div class="chart-container">
+                            <canvas id="expense-category-chart"></canvas>
+                        </div>
+
+                    </div>
+                    
                 </div>
             </section>
 
@@ -238,6 +260,7 @@
     
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
     <script src="script.js"></script>
 </body>
 

@@ -222,6 +222,8 @@ expenseForm.addEventListener("submit", function(event){
 
     displayTransactions();
 
+    updateExpenseCategoryChart();
+
     expenseForm.reset();
 });
 
@@ -253,8 +255,6 @@ incomeForm.addEventListener("submit", function(event){
 
     incomeForm.reset();
 });
-
-displayTransactions();
 
 closeModal.addEventListener("click", function(){
     transactionModal.style.display = "none";
@@ -415,6 +415,8 @@ editTransaction.addEventListener("click", function(){
 
         displayTransactions();
 
+        updateExpenseCategoryChart();
+
         transactionModal.style.display = "none";
         document.body.classList.remove("modal-open");
 
@@ -442,6 +444,8 @@ deleteTransaction.addEventListener("click", function(){
 
     displayTransactions();
 
+    updateExpenseCategoryChart();
+
     transactionModal.style.display = "none";
     document.body.classList.remove("modal-open");
 
@@ -465,7 +469,7 @@ function calculateExpensesByCategory(){
 
     transactions.forEach(function(transaction){
         
-        if(transaction.type == "Expense"){
+        if(transaction.type === "Expense"){
             if(categoryTotals[transaction.category]){
                 categoryTotals[transaction.category] = categoryTotals[transaction.category] + Number(transaction.amount);
             }
@@ -481,3 +485,53 @@ function calculateExpensesByCategory(){
 loadTransactions();
 calculateTotals();
 displayTransactions();
+
+const expenseCategoryCanvas = document.getElementById("expense-category-chart");
+
+let expenseCategoryChart = null;
+
+function updateExpenseCategoryChart() {
+
+    const categoryTotals = calculateExpensesByCategory();
+
+    const categories = Object.keys(categoryTotals);
+    const amounts = Object.values(categoryTotals);
+
+    const chartColors = [
+        "#3B82F6",
+        "#F97316",
+        "#22C55E",
+        "#EF4444",
+        "#8B5CF6",
+        "#EAB308",
+        "#EC4899",
+        "#14B8A6",
+        "#6366F1"
+    ];
+
+    if (expenseCategoryChart === null) {
+
+        expenseCategoryChart = new Chart(expenseCategoryCanvas, {
+            type: "doughnut",
+            data: {
+                labels: categories,
+                datasets: [{
+                    label: "Expenses",
+                    data: amounts,
+                    backgroundColor: chartColors
+                }]
+            }
+        });
+    }
+    else{
+        expenseCategoryChart.data.labels = categories;
+        expenseCategoryChart.data.datasets[0].data = amounts;
+        expenseCategoryChart.data.datasets[0].backgroundColor = chartColors;
+        expenseCategoryChart.update();
+    }
+}
+
+loadTransactions();
+calculateTotals();
+displayTransactions();
+updateExpenseCategoryChart();
