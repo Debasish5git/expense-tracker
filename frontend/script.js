@@ -60,6 +60,19 @@ const sidebar = document.getElementById("sidebar");
 
 const sidebarToggle = document.getElementById("sidebar-toggle");
 
+const analyticsMenuButton = document.getElementById("analytics-menu-button");
+
+const analyticsMenuDropdown = document.getElementById("analytics-menu-dropdown");
+
+analyticsMenuButton.addEventListener("click", function(){
+    if(analyticsMenuDropdown.style.display === "block"){
+        analyticsMenuDropdown.style.display = "none";
+    }
+    else{
+        analyticsMenuDropdown.style.display = "block";
+    }
+});
+
 sidebarToggle.addEventListener("click", function(){
     sidebar.classList.toggle("collapsed");
 });
@@ -490,12 +503,44 @@ const expenseCategoryCanvas = document.getElementById("expense-category-chart");
 
 let expenseCategoryChart = null;
 
+const doughnutChartOption = document.getElementById("doughnut-chart-option");
+
+const barChartOption = document.getElementById("bar-chart-option");
+
+doughnutChartOption.addEventListener("click", function(){
+
+    localStorage.setItem("chartType", "doughnut");
+
+    expenseCategoryChart.destroy();
+
+    expenseCategoryChart = null;
+
+    updateExpenseCategoryChart();
+
+    analyticsMenuDropdown.style.display = "none";
+});
+
+barChartOption.addEventListener("click", function(){
+
+    localStorage.setItem("chartType", "bar");
+
+    expenseCategoryChart.destroy();
+
+    expenseCategoryChart = null;
+
+    updateExpenseCategoryChart();
+
+    analyticsMenuDropdown.style.display = "none";
+});
+
 function updateExpenseCategoryChart() {
 
     const categoryTotals = calculateExpensesByCategory();
 
     const categories = Object.keys(categoryTotals);
     const amounts = Object.values(categoryTotals);
+
+    const savedChartType = localStorage.getItem("chartType") || "doughnut";
 
     const chartColors = [
         "#3B82F6",
@@ -512,7 +557,7 @@ function updateExpenseCategoryChart() {
     if (expenseCategoryChart === null) {
 
         expenseCategoryChart = new Chart(expenseCategoryCanvas, {
-            type: "doughnut",
+            type: savedChartType,
             data: {
                 labels: categories,
                 datasets: [{
@@ -520,7 +565,27 @@ function updateExpenseCategoryChart() {
                     data: amounts,
                     backgroundColor: chartColors
                 }]
-            }
+            },
+
+            options: savedChartType === "bar"
+                ? {
+                    responsive:true,
+                    maintainAspectRatio:false,
+
+                    scales: {
+                        x: {
+                            beginAtZero:true
+                        },
+                        y: {
+                            beginAtZero:true
+                        }
+                    }
+                }
+                : {
+                    responsive:true,
+                    maintainAspectRatio:false,
+                    scales:{}
+                }
         });
     }
     else{
