@@ -1,8 +1,10 @@
 console.log("Expense Tracker JavaScript is connected!");
 
+const API_URL = "http://127.0.0.1:8000";
+
 const pageTitle = document.getElementById("page-title");
 
-const expenseForm =document.getElementById("expense-form");
+const expenseForm = document.getElementById("expense-form");
 
 const amountInput = document.getElementById("amount");
 
@@ -64,32 +66,32 @@ const analyticsMenuButton = document.getElementById("analytics-menu-button");
 
 const analyticsMenuDropdown = document.getElementById("analytics-menu-dropdown");
 
-analyticsMenuButton.addEventListener("click", function(){
-    if(analyticsMenuDropdown.style.display === "block"){
+analyticsMenuButton.addEventListener("click", function () {
+    if (analyticsMenuDropdown.style.display === "block") {
         analyticsMenuDropdown.style.display = "none";
     }
-    else{
+    else {
         analyticsMenuDropdown.style.display = "block";
     }
 });
 
-sidebarToggle.addEventListener("click", function(){
+sidebarToggle.addEventListener("click", function () {
     sidebar.classList.toggle("collapsed");
 });
 
-typeFilter.addEventListener("change", function(){
+typeFilter.addEventListener("change", function () {
     const selectedType = typeFilter.value;
 
-    const filteredTransactions = transactions.filter(function(transaction){
+    const filteredTransactions = transactions.filter(function (transaction) {
         return selectedType === "all" || transaction.type === selectedType;
     });
-    
+
     displayTransactions(filteredTransactions);
 });
 
-sortFilter.addEventListener("change", function(){
+sortFilter.addEventListener("change", function () {
     const selectedType = typeFilter.value;
-    const filteredTransactions = transactions.filter(function(transaction){
+    const filteredTransactions = transactions.filter(function (transaction) {
         return selectedType === "all" || transaction.type === selectedType;
     });
 
@@ -98,29 +100,29 @@ sortFilter.addEventListener("change", function(){
     displayTransactions(sortedTransactions);
 });
 
-function sortTransactions(transactionList){
+function sortTransactions(transactionList) {
     const selectedSort = sortFilter.value;
 
-    if(selectedSort === "newest"){
-        transactionList.sort(function(a, b){
+    if (selectedSort === "newest") {
+        transactionList.sort(function (a, b) {
             return new Date(b.date) - new Date(a.date);
         });
     }
 
-    else if(selectedSort === "oldest"){
-        transactionList.sort(function(a, b){
+    else if (selectedSort === "oldest") {
+        transactionList.sort(function (a, b) {
             return new Date(a.date) - new Date(b.date);
         });
     }
 
-    else if(selectedSort === "amount-high"){
-        transactionList.sort(function(a, b){
+    else if (selectedSort === "amount-high") {
+        transactionList.sort(function (a, b) {
             return Number(b.amount) - Number(a.amount);
         });
     }
 
-    else if(selectedSort === "amount-low"){
-        transactionList.sort(function(a, b){
+    else if (selectedSort === "amount-low") {
+        transactionList.sort(function (a, b) {
             return Number(a.amount) - Number(b.amount);
         });
     }
@@ -128,7 +130,7 @@ function sortTransactions(transactionList){
     return transactionList;
 }
 
-function showTransactionDetails(transaction){
+function showTransactionDetails(transaction) {
 
     transactionDetails.innerHTML = `
         <p><strong>Description:</strong> ${transaction.description}</p>
@@ -140,11 +142,11 @@ function showTransactionDetails(transaction){
     `;
 }
 
-function displayTransactions(transactionList = transactions){
+function displayTransactions(transactionList = transactions) {
 
     transactionsBody.innerHTML = "";
 
-    if(transactionList.length === 0){
+    if (transactionList.length === 0) {
         const placeholderRow = document.createElement("tr");
 
         const placeholderCell = document.createElement("td");
@@ -155,13 +157,13 @@ function displayTransactions(transactionList = transactions){
         transactionsBody.appendChild(placeholderRow);
     }
 
-    transactionList.forEach(function(transaction){
+    transactionList.forEach(function (transaction) {
 
         const newRow = document.createElement("tr");
 
         newRow.style.cursor = "pointer";
 
-        newRow.addEventListener("click", function(){
+        newRow.addEventListener("click", function () {
 
             selectedTransaction = transaction;
 
@@ -214,33 +216,59 @@ function calculateTotals() {
     balance.textContent = "₹" + (totalIncomeAmount - totalExpenseAmount);
 }
 
-expenseForm.addEventListener("submit", function(event){
+expenseForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
-    const expense = {
-        amount: amountInput.value,
+    const expenseData = {
+        amount: Number(amountInput.value),
         category: categoryInput.value,
         description: descriptionInput.value,
         date: dateInput.value,
-        paymentMethod: paymentMethodInput.value,
-        type: "Expense"
+        paymentMethod: paymentMethodInput.value
     };
-    transactions.push(expense);
-    saveTransactions();
 
-    totalExpenseAmount = totalExpenseAmount + Number(expense.amount);
-    totalExpenses.textContent = "₹" + totalExpenseAmount;
+    try {
+        const response = await fetch(`${API_URL}/expenses`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(expenseData)
+        });
 
-    balance.textContent = "₹" + (totalIncomeAmount - totalExpenseAmount);
+        if (!response.ok) {
+            const errorData = await response.json();
 
-    displayTransactions();
+            throw new Error(
+                errorData.detail ? JSON.stringify(errorData.detail) : "Failed to save expense"
+            );
+        }
 
-    updateExpenseCategoryChart();
+        const savedExpense = await response.json();
 
-    expenseForm.reset();
+        const transaction = {
+            ...savedExpense,
+            type: "Expense"
+        };
+
+        transactions.push(transaction);
+
+        calculateTotals();
+        displayTransactions();
+        updateExpenseCategoryChart();
+
+        expenseForm.reset();
+
+        console.log("Expense saved to MySQL:", savedExpense);
+    }
+    catch (error) {
+
+        console.error("Error saving expense:", error);
+        alert(`Could not save expense: ${error.message}`);
+    }
 });
 
-incomeForm.addEventListener("submit", function(event){
+incomeForm.addEventListener("submit", function (event) {
     event.preventDefault();
 
     const incomeAmount = incomeAmountInput.value;
@@ -269,13 +297,13 @@ incomeForm.addEventListener("submit", function(event){
     incomeForm.reset();
 });
 
-closeModal.addEventListener("click", function(){
+closeModal.addEventListener("click", function () {
     transactionModal.style.display = "none";
     document.body.classList.remove("modal-open");
 });
 
-cancelModal.addEventListener("click", function(){
-    if(selectedTransaction === null){
+cancelModal.addEventListener("click", function () {
+    if (selectedTransaction === null) {
         return;
     }
 
@@ -293,12 +321,12 @@ cancelModal.addEventListener("click", function(){
     selectedTransaction = null;
 });
 
-editTransaction.addEventListener("click", function(){
-    if(selectedTransaction === null){
+editTransaction.addEventListener("click", async function () {
+    if (selectedTransaction === null) {
         return
     }
 
-    if(editTransaction.textContent === "Edit"){
+    if (editTransaction.textContent === "Edit") {
 
         editTransaction.textContent = "Save Changes";
 
@@ -352,9 +380,9 @@ editTransaction.addEventListener("click", function(){
             </div>
         `;
 
-            document.getElementById("edit-category").value = selectedTransaction.category;
+            document.getElementById("edit-category").value = (selectedTransaction.category || "").trim().toLowerCase();
 
-            document.getElementById("edit-payment-method").value = selectedTransaction.paymentMethod;
+            document.getElementById("edit-payment-method").value = (selectedTransaction.paymentMethod || "").trim().toLowerCase().replace(/\s+/g,"-");
         }
 
         else if (selectedTransaction.type === "Income") {
@@ -400,104 +428,235 @@ editTransaction.addEventListener("click", function(){
 
     else {
 
-        if (selectedTransaction.type === "Expense") {
-            const editedAmount = document.getElementById("edit-amount").value;
-            const editedCategory = document.getElementById("edit-category").value;
-            const editedDescription = document.getElementById("edit-description").value;
-            const editedDate = document.getElementById("edit-date").value;
-            const editedPaymentMethod = document.getElementById("edit-payment-method").value;
+        try {
+            if (selectedTransaction.type === "Expense") {
+                const editedAmount = Number(document.getElementById("edit-amount").value);
+                const editedCategory = document.getElementById("edit-category").value;
+                const editedDescription = document.getElementById("edit-description").value.trim();
+                const editedDate = document.getElementById("edit-date").value;
 
-            selectedTransaction.amount = editedAmount;
-            selectedTransaction.category = editedCategory;
-            selectedTransaction.description = editedDescription;
-            selectedTransaction.date = editedDate;
-            selectedTransaction.paymentMethod = editedPaymentMethod;
+                const paymentMethodLabels = {
+                    "cash": "Cash",
+                    "upi": "UPI",
+                    "debit-card": "Debit Card",
+                    "credit-card": "Credit Card",
+                    "bank-transfer": "Bank Transfer"
+                };
+
+                const editedPaymentMethod =
+                    paymentMethodLabels[
+                    document.getElementById("edit-payment-method").value
+                    ];
+                
+                if(
+                    !Number.isFinite(editedAmount)||
+                    editedAmount <= 0 ||
+                    !editedCategory ||
+                    !editedDescription ||
+                    !editedDate ||
+                    !editedPaymentMethod
+                )
+                {
+                    alert("Please enter valid values for all fields");
+                    return;
+                }
+
+                const updatedExpenseData = {
+                    amount:editedAmount,
+                    category:editedCategory,
+                    description:editedDescription,
+                    date:editedDate,
+                    paymentMethod:editedPaymentMethod
+                };
+
+                const response = await fetch(`${API_URL}/expenses/${selectedTransaction.id}`,
+                    {
+                        method:"PUT",
+                        headers:{
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(updatedExpenseData)
+                    }
+                );
+
+                if(!response.ok){
+                    const errorData = await response.json();
+
+                    throw new Error(
+                        errorData.detail ? JSON.stringify(errorData.detail) : "Failed to update expense"
+                    );
+                }
+
+                const updatedExpense = await response.json();
+
+                Object.assign(selectedTransaction, updatedExpense, {
+                    type:"Expense"
+                });
+            }
+
+            else if (selectedTransaction.type === "Income") {
+                const editedAmount = document.getElementById("edit-income-amount").value;
+                const editedSource = document.getElementById("edit-income-source").value;
+                const editedDate = document.getElementById("edit-income-date").value;
+
+                selectedTransaction.amount = editedAmount;
+                selectedTransaction.description = editedSource;
+                selectedTransaction.date = editedDate;
+
+                saveTransactions();
+            }
+            calculateTotals();
+
+            displayTransactions();
+
+            updateExpenseCategoryChart();
+
+            transactionModal.style.display = "none";
+
+            document.body.classList.remove("modal-open");
+
+            editTransaction.textContent = "Edit";
+            selectedTransaction = null;
+
+            console.log("Transaction updated successfully.");
         }
-        else if (selectedTransaction.type === "Income") {
-            const editedAmount = document.getElementById("edit-income-amount").value;
-            const editedSource = document.getElementById("edit-income-source").value;
-            const editedDate = document.getElementById("edit-income-date").value;
+        catch(error){
 
-            selectedTransaction.amount = editedAmount;
-            selectedTransaction.description = editedSource;
-            selectedTransaction.date = editedDate;
+            console.error("Error updating transaction:", error);
+            alert(`Could not update transaction: ${error.message}`);
         }
-
-        calculateTotals();
-        saveTransactions();
-
-        displayTransactions();
-
-        updateExpenseCategoryChart();
-
-        transactionModal.style.display = "none";
-        document.body.classList.remove("modal-open");
-
-        editTransaction.textContent = "Edit";
-
-        selectedTransaction = null;
     }
 });
 
-deleteTransaction.addEventListener("click", function(){
-    if(selectedTransaction === null){
+deleteTransaction.addEventListener("click", async function () {
+    if (selectedTransaction === null) {
         return;
     }
 
     const transactionIndex = transactions.indexOf(selectedTransaction);
 
-    if(transactionIndex === -1){
+    if (transactionIndex === -1) {
         return;
     }
 
-    transactions.splice(transactionIndex, 1);
+    try {
+        if (selectedTransaction.type === "Expense") {
+            const response = await fetch(`${API_URL}/expenses/${selectedTransaction.id}`,
+                {
+                    method: "DELETE"
+                }
+            );
 
-    calculateTotals();
-    saveTransactions();
+            if (!response.ok) {
+                const errorData = await response.json();
 
-    displayTransactions();
+                throw new Error(errorData.detail || "Failed to delete expense");
+            }
+        }
 
-    updateExpenseCategoryChart();
+        transactions.splice(transactionIndex, 1);
 
-    transactionModal.style.display = "none";
-    document.body.classList.remove("modal-open");
+        calculateTotals();
+        saveTransactions();
+        displayTransactions();
+        updateExpenseCategoryChart();
 
-    selectedTransaction = null;
+        transactionModal.style.display = "none";
+        document.body.classList.remove("modal-open");
+
+        selectedTransaction = null;
+
+        console.log("Transaction deleted successfully");
+    }
+    catch (error) {
+        console.error("Error deleting the transaction:", error);
+        alert(`Could not delete transaction: ${error.message}`);
+    }
 });
 
-function saveTransactions(){
+function saveTransactions() {
     localStorage.setItem("transactions", JSON.stringify(transactions));
 }
 
-function loadTransactions(){
+function loadTransactions() {
     const savedTransactions = localStorage.getItem("transactions");
 
-    if(savedTransactions){
-        transactions = JSON.parse(savedTransactions);
+    if (savedTransactions) {
+        const localTransactions = JSON.parse(savedTransactions);
+        transactions = localTransactions.filter(function (transaction) {
+            return transaction.type === "income";
+        });
     }
 }
 
-function calculateExpensesByCategory(){
+async function loadExpensesFromAPI() {
+    try {
+        const response = await fetch(`${API_URL}/expenses`);
+
+        if (!response.ok) {
+            throw new Error("Failed to load expenses");
+        }
+
+        const expenses = await response.json();
+
+        const expenseTransactions = expenses.map(function (expense) {
+            return {
+                ...expense,
+                type: "Expense"
+            };
+        });
+
+        transactions = [
+            ...transactions.filter(function (transaction) {
+                return transaction.type === "income";
+            }),
+            ...expenseTransactions
+        ];
+
+        calculateTotals();
+        displayTransactions();
+        updateExpenseCategoryChart();
+    }
+    catch (error) {
+        console.error("Error loading expenses:", error);
+        alert("Could not load expenses from the backend. Check that FastAPI is running.");
+    }
+}
+
+async function initializeTransactions() {
+    loadTransactions();
+    calculateTotals();
+    displayTransactions();
+    await loadExpensesFromAPI();
+}
+
+function calculateExpensesByCategory() {
     const categoryTotals = {};
 
-    transactions.forEach(function(transaction){
-        
-        if(transaction.type === "Expense"){
-            if(categoryTotals[transaction.category]){
-                categoryTotals[transaction.category] = categoryTotals[transaction.category] + Number(transaction.amount);
+    transactions.forEach(function (transaction) {
+
+        if (transaction.type === "Expense") {
+
+            const category = transaction.category
+                ? transaction.category.trim()
+                    .toLowerCase()
+                    .replace(/\b\w/g, function (letter) {
+                        return letter.toUpperCase();
+                    })
+                : "Other";
+
+            if (categoryTotals[category]) {
+                categoryTotals[category] = categoryTotals[category] + Number(transaction.amount);
             }
-            else{
-                categoryTotals[transaction.category] = Number(transaction.amount);
+
+            else {
+                categoryTotals[category] = Number(transaction.amount);
             }
         }
     });
 
     return categoryTotals;
 }
-
-loadTransactions();
-calculateTotals();
-displayTransactions();
 
 const expenseCategoryCanvas = document.getElementById("expense-category-chart");
 
@@ -507,7 +666,7 @@ const doughnutChartOption = document.getElementById("doughnut-chart-option");
 
 const barChartOption = document.getElementById("bar-chart-option");
 
-doughnutChartOption.addEventListener("click", function(){
+doughnutChartOption.addEventListener("click", function () {
 
     localStorage.setItem("chartType", "doughnut");
 
@@ -520,7 +679,7 @@ doughnutChartOption.addEventListener("click", function(){
     analyticsMenuDropdown.style.display = "none";
 });
 
-barChartOption.addEventListener("click", function(){
+barChartOption.addEventListener("click", function () {
 
     localStorage.setItem("chartType", "bar");
 
@@ -538,6 +697,7 @@ function updateExpenseCategoryChart() {
     const categoryTotals = calculateExpensesByCategory();
 
     const categories = Object.keys(categoryTotals);
+
     const amounts = Object.values(categoryTotals);
 
     const savedChartType = localStorage.getItem("chartType") || "doughnut";
@@ -569,26 +729,26 @@ function updateExpenseCategoryChart() {
 
             options: savedChartType === "bar"
                 ? {
-                    responsive:true,
-                    maintainAspectRatio:false,
+                    responsive: true,
+                    maintainAspectRatio: false,
 
                     scales: {
                         x: {
-                            beginAtZero:true
+                            beginAtZero: true
                         },
                         y: {
-                            beginAtZero:true
+                            beginAtZero: true
                         }
                     }
                 }
                 : {
-                    responsive:true,
-                    maintainAspectRatio:false,
-                    scales:{}
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {}
                 }
         });
     }
-    else{
+    else {
         expenseCategoryChart.data.labels = categories;
         expenseCategoryChart.data.datasets[0].data = amounts;
         expenseCategoryChart.data.datasets[0].backgroundColor = chartColors;
@@ -596,7 +756,4 @@ function updateExpenseCategoryChart() {
     }
 }
 
-loadTransactions();
-calculateTotals();
-displayTransactions();
-updateExpenseCategoryChart();
+initializeTransactions();
