@@ -10,3 +10,11 @@ class Expense(Base):
     description = Column(String(255), nullable=False)
     date = Column(Date, nullable=False)
     paymentMethod = Column(String(50), nullable=False)
+
+class Income(Base):
+    __tablename__ = "incomes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    amount = Column(Float, nullable=False)
+    source = Column(String(100), nullable=False)
+    date = Column(Date, nullable=False)

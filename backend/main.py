@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from backend.schemas import ExpenseCreate, ExpenseResponse
+from backend.schemas import ExpenseCreate, ExpenseResponse, IncomeCreate, IncomeResponse
 
 from backend.database import engine, Base, get_db
 from backend import models
@@ -78,3 +78,61 @@ def update_expense(expense_id:int, expense_data:ExpenseCreate, db:Session = Depe
     db.refresh(expense)
 
     return expense
+
+@app.post("/incomes", response_model=IncomeResponse)
+def add_income(income: IncomeCreate, db: Session = Depends(get_db)):
+    db_income = models.Income(
+        amount=income.amount,
+        source=income.source,
+        date=income.date
+    )
+
+    db.add(db_income)
+    db.commit()
+    db.refresh(db_income)
+
+    return db_income
+
+@app.get("/incomes", response_model=list[IncomeResponse])
+def get_incomes(db: Session = Depends(get_db)):
+    incomes = (
+        db.query(models.Income).order_by(models.Income.id.desc()).all()
+    )
+
+    return incomes
+
+@app.put("/incomes/{income_id}", response_model=IncomeResponse)
+def update_income(
+    income_id:int,
+    income_data:IncomeCreate,
+    db:Session = Depends(get_db)
+):
+
+    income = db.query(models.Income).filter(models.Income.id == income_id).first()
+
+    if income is None:
+        raise HTTPException(status_code=404, detail="Income not found")
+
+    income.amount = income_data.amount
+    income.source = income_data.source
+    income.date = income_data.date
+
+    db.commit()
+    db.refresh(income)
+
+    return income
+
+@app.delete("/incomes/{income_id}")
+def delete_income(income_id:int, db:Session = Depends(get_db)):
+    income = db.query(models.Income).filter(models.Income.id == income_id).first()
+
+    if income is None:
+        raise HTTPException(status_code=404, detail="Income not found")
+
+    db.delete(income)
+    db.commit()
+
+    return {
+        "message": "Income deleted successfully",
+        "id": income_id
+    }

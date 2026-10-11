@@ -17,3 +17,16 @@ class ExpenseResponse(BaseModel):
     paymentMethod:str
 
     model_config = {"from_attributes": True}
+
+class IncomeCreate(BaseModel):
+    amount:float
+    source:str
+    date:date
+
+class IncomeResponse(BaseModel):
+    id:int
+    amount:float
+    source:str
+    date:date
+
+    model_config = {"from_attributes": True}

@@ -79,26 +79,9 @@ sidebarToggle.addEventListener("click", function () {
     sidebar.classList.toggle("collapsed");
 });
 
-typeFilter.addEventListener("change", function () {
-    const selectedType = typeFilter.value;
+typeFilter.addEventListener("change", renderFilteredTransactions);
 
-    const filteredTransactions = transactions.filter(function (transaction) {
-        return selectedType === "all" || transaction.type === selectedType;
-    });
-
-    displayTransactions(filteredTransactions);
-});
-
-sortFilter.addEventListener("change", function () {
-    const selectedType = typeFilter.value;
-    const filteredTransactions = transactions.filter(function (transaction) {
-        return selectedType === "all" || transaction.type === selectedType;
-    });
-
-    const sortedTransactions = sortTransactions(filteredTransactions);
-
-    displayTransactions(sortedTransactions);
-});
+sortFilter.addEventListener("change", renderFilteredTransactions);
 
 function sortTransactions(transactionList) {
     const selectedSort = sortFilter.value;
@@ -128,6 +111,19 @@ function sortTransactions(transactionList) {
     }
 
     return transactionList;
+}
+
+function renderFilteredTransactions() {
+    const selectedType = typeFilter.value;
+
+    const filteredTransactions = transactions.filter(function (transaction) {
+        return selectedType === "all" ||
+            transaction.type === selectedType;
+    });
+
+    const sortedTransactions = sortTransactions(filteredTransactions);
+
+    displayTransactions(sortedTransactions);
 }
 
 function showTransactionDetails(transaction) {
@@ -268,33 +264,53 @@ expenseForm.addEventListener("submit", async function (event) {
     }
 });
 
-incomeForm.addEventListener("submit", function (event) {
+incomeForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
-    const incomeAmount = incomeAmountInput.value;
-    const incomeSource = incomeSourceInput.value;
+    const incomeAmount = Number(incomeAmountInput.value);
+    const incomeSource = incomeSourceInput.value.trim();
     const incomeDate = incomeDateInput.value;
 
-    const income = {
+    const incomeData = {
         amount: incomeAmount,
-        description: incomeSource,
-        date: incomeDate,
-        type: "Income"
+        source: incomeSource,
+        date: incomeDate
     };
 
-    transactions.push(income);
+    try{
+        const response = await fetch(`${API_URL}/incomes`,{
+            method:"POST",
+            headers:{
+                "Content-Type": "application/json"
+            },
+            body:JSON.stringify(incomeData)
+        });
 
-    saveTransactions();
+        if(!response.ok){
+            const errorData = await response.json();
+            throw new Error(errorData.detail || "Failed to add income");
+        }
 
-    totalIncomeAmount = totalIncomeAmount + Number(incomeAmount);
+        const savedIncome = await response.json();
 
-    totalIncome.textContent = "₹" + totalIncomeAmount;
+        const income = {
+            id: savedIncome.id,
+            amount: savedIncome.amount,
+            description: savedIncome.source,
+            date: savedIncome.date,
+            type: "Income"
+        };
 
-    balance.textContent = "₹" + (totalIncomeAmount - totalExpenseAmount);
+        transactions.push(income);
 
-    displayTransactions();
-
-    incomeForm.reset();
+        calculateTotals();
+        displayTransactions();
+        updateExpenseCategoryChart();
+    }
+    catch(error){
+        console.error("Error adding income:", error);
+        alert("Could not save income:" + error.message);
+    }
 });
 
 closeModal.addEventListener("click", function () {
@@ -495,15 +511,53 @@ editTransaction.addEventListener("click", async function () {
             }
 
             else if (selectedTransaction.type === "Income") {
-                const editedAmount = document.getElementById("edit-income-amount").value;
-                const editedSource = document.getElementById("edit-income-source").value;
+                const editedAmount = Number(document.getElementById("edit-income-amount").value);
+                const editedSource = document.getElementById("edit-income-source").value.trim();
                 const editedDate = document.getElementById("edit-income-date").value;
 
-                selectedTransaction.amount = editedAmount;
-                selectedTransaction.description = editedSource;
-                selectedTransaction.date = editedDate;
+                if(
+                    !Number.isFinite(editedAmount) ||
+                    editedAmount <= 0 ||
+                    !editedSource ||
+                    !editedDate
+                )
+                {
+                    alert("Please enter a valid value for all fields");
+                    return;
+                }
 
-                saveTransactions();
+                const updatedIncomeData = {
+                    amount: editedAmount,
+                    source: editedSource,
+                    date: editedDate
+                };
+
+                const response = await fetch(
+                    `${API_URL}/incomes/${selectedTransaction.id}`,
+                    {
+                        method: "PUT",
+                        headers:{
+                            "Content-Type":"application/json"
+                        },
+                        body: JSON.stringify(updatedIncomeData)
+                    }
+                );
+
+                if(!response.ok){
+                    const errorData = await response.json();
+
+                    throw new Error(errorData.detail || "Failed to update income");
+                }
+
+                const updatedIncome = await response.json();
+
+                Object.assign(selectedTransaction, {
+                    id:updatedIncome.id,
+                    amount:updatedIncome.amount,
+                    description:updatedIncome.source,
+                    date:updatedIncome.date,
+                    type:"Income"
+                });
             }
             calculateTotals();
 
@@ -533,31 +587,45 @@ deleteTransaction.addEventListener("click", async function () {
         return;
     }
 
-    const transactionIndex = transactions.indexOf(selectedTransaction);
-
-    if (transactionIndex === -1) {
-        return;
-    }
+    const transactionId = selectedTransaction.id;
+    const transactionType = selectedTransaction.type;
 
     try {
-        if (selectedTransaction.type === "Expense") {
-            const response = await fetch(`${API_URL}/expenses/${selectedTransaction.id}`,
+        let response;
+
+        if (transactionType === "Expense") {
+            response = await fetch(`${API_URL}/expenses/${transactionId}`,
                 {
                     method: "DELETE"
                 }
             );
-
-            if (!response.ok) {
-                const errorData = await response.json();
-
-                throw new Error(errorData.detail || "Failed to delete expense");
-            }
+        }
+        else if(transactionType === "Income"){
+            response = await fetch(
+                `${API_URL}/incomes/${transactionId}`,
+                {
+                    method:"DELETE"
+                }
+            );
+        }
+        else{
+            throw new Error("Unknown transaction type");
         }
 
-        transactions.splice(transactionIndex, 1);
+        if (!response.ok) {
+            const errorData = await response.json();
+
+            throw new Error(errorData.detail || "Failed to delete transaction");
+        }
+
+        transactions = transactions.filter(function (transaction) {
+            return !(
+                transaction.id === transactionId &&
+                transaction.type === transactionType
+            );
+        });
 
         calculateTotals();
-        saveTransactions();
         displayTransactions();
         updateExpenseCategoryChart();
 
@@ -574,59 +642,74 @@ deleteTransaction.addEventListener("click", async function () {
     }
 });
 
-function saveTransactions() {
-    localStorage.setItem("transactions", JSON.stringify(transactions));
-}
-
-function loadTransactions() {
-    const savedTransactions = localStorage.getItem("transactions");
-
-    if (savedTransactions) {
-        const localTransactions = JSON.parse(savedTransactions);
-        transactions = localTransactions.filter(function (transaction) {
-            return transaction.type === "income";
-        });
-    }
-}
-
 async function loadExpensesFromAPI() {
     try {
-        const response = await fetch(`${API_URL}/expenses`);
+        const [expenseResponse, incomeResponse] = await Promise.all([
+            fetch(`${API_URL}/expenses`),
+            fetch(`${API_URL}/incomes`)
+        ]);
 
-        if (!response.ok) {
-            throw new Error("Failed to load expenses");
+        if (!expenseResponse.ok || !incomeResponse.ok) {
+            throw new Error("Failed to load transactions");
         }
 
-        const expenses = await response.json();
+        const expenses = await expenseResponse.json();
+        const incomes = await incomeResponse.json();
 
         const expenseTransactions = expenses.map(function (expense) {
             return {
-                ...expense,
-                type: "Expense"
+                id:expense.id,
+                amount:expense.amount,
+                category:expense.category,
+                description:expense.description,
+                date:expense.date,
+                paymentMethod:expense.paymentMethod,
+                type:"Expense"
+            };
+        });
+
+        const incomeTransactions = incomes.map(function(income){
+            return{
+                id:income.id,
+                amount:income.amount,
+                description:income.source,
+                date:income.date,
+                type:"Income"
             };
         });
 
         transactions = [
-            ...transactions.filter(function (transaction) {
-                return transaction.type === "income";
-            }),
-            ...expenseTransactions
+            ...expenseTransactions,
+            ...incomeTransactions
         ];
 
-        calculateTotals();
+        totalExpenseAmount = transactions
+        .filter(function(transaction){
+            return transaction.type === "Expense";
+        })
+        .reduce(function(total, transaction){
+            return total + Number(transaction.amount);
+        }, 0);
+
+        totalIncomeAmount = transactions
+        .filter(function(transaction){
+            return transaction.type === "Income";
+        })
+        .reduce(function(total, transaction){
+            return total + Number(transaction.amount);
+        }, 0);
+        
         displayTransactions();
+        calculateTotals();
         updateExpenseCategoryChart();
     }
     catch (error) {
-        console.error("Error loading expenses:", error);
-        alert("Could not load expenses from the backend. Check that FastAPI is running.");
+        console.error("Error loading transactions:", error);
+        alert("Could not load transactions from the backend. Check that FastAPI is running.");
     }
 }
 
 async function initializeTransactions() {
-    loadTransactions();
-    calculateTotals();
-    displayTransactions();
     await loadExpensesFromAPI();
 }
 
